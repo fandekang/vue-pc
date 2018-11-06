@@ -1,0 +1,94 @@
+<template>
+    <div class="article-type-container" >
+        <el-row v-for="item in items" :key="item.type">
+            <el-col :span="19" >
+                <span class="interEvent" @click="interEvent(item.type)">{{item.type}}</span>
+            </el-col>
+            <el-col :span="5">
+                <span class="count">{{item.count}}</span>篇
+            </el-col>
+        </el-row>
+        <br/>
+        <hr>
+        热门文章
+        <hr>
+        <ul>
+            <li v-for="host in hostList " :key="host.title">
+                <span class="interEvent title" @click="hostEvent(host.articleid)">{{ host.title}}</span>
+            </li>
+        </ul>
+    </div>
+</template>
+
+<script type="text/javascript">
+
+  export default {
+    name: "ArticleType",
+        data() {
+      return {
+          items: [],
+          hostList: []
+      }
+    },
+    mounted() {
+      this.getAjax();
+      this.LoadHostEvent();
+    },
+    methods: {
+      getAjax: function() {
+       let _this = this;
+       var successCallback = (response) => {
+          console.log('服务器请求成功了')
+          console.log(response.data)
+          _this.items = JSON.parse(response.bodyText).data;
+        }
+        var errorCallback = (response) => {
+            console.log('服务器请求出错了')
+        }
+        this.$http.get(process.env.ROOT_API + 'article/getArtTypeList.do').then(successCallback, errorCallback);
+      },
+      LoadHostEvent: function() {
+          let _this = this;
+          var successCallback = (response) => {
+              console.log('服务器请求成功了')
+              console.log(response.data)
+              _this.hostList = JSON.parse(response.bodyText).data;
+              for (let i = 0; i <= _this.hostList.length; i++) {
+                  if (_this.hostList[i] && _this.hostList[i].title.length > 30) {
+                      _this.hostList[i].title = _this.hostList[i].title.substr(0, 30);
+                  }
+              }
+          }
+          var errorCallback = (response) => {
+              console.log('服务器请求出错了')
+          }
+          this.$http.get(process.env.ROOT_API + 'article/getHostArtList.do').then(successCallback, errorCallback);
+      },
+      interEvent(value) {
+          this.$router.push({name: 'BlogType', query: {type: value}})
+      },
+      hostEvent(value) {
+          this.$router.push({name: 'BlogLister', query: {id: value}})
+      }
+    }
+  }
+</script>
+<style type="text/css">
+  .article-type-container {
+    font-size: 13px;
+    color: #aaa;
+    /*padding: 0 20px;*/
+  }
+  .el-row {
+      padding:5px;
+  }
+  .interEvent{
+      border:none;
+      outline:none;
+      background:none;
+      -webkit-appearance: none;
+  }
+  .tiele{
+      text-align: left;
+  }
+</style>
