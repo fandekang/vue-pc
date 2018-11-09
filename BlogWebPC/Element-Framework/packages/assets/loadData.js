@@ -40,7 +40,7 @@ export default {
             })
             this.$http.post(url, remoteParam, {emulateJSON: true}).then(response => {
                 // console.log("成功");
-                console.log("bodyText = " + response.bodyText);
+                console.log("bodyText = " + response.bodyText)
                 const body = JSON.parse(response.bodyText)
 
                 if (body.errorMsg) {

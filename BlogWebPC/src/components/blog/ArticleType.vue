@@ -13,8 +13,8 @@
         热门文章
         <hr>
         <ul>
-            <li v-for="host in hostList " :key="host.title">
-                <span class="interEvent title" @click="hostEvent(host.articleid)">{{ host.title}}</span>
+            <li class="article-list-item" v-for="host in hostList " :key="host.title">
+                <span class="interEvent" @click="hostEvent(host.articleid)">{{ host.title}}</span>
             </li>
         </ul>
     </div>
@@ -36,8 +36,8 @@
     },
     methods: {
       getAjax: function() {
-       let _this = this;
-       var successCallback = (response) => {
+        let _this = this;
+        var successCallback = (response) => {
           console.log('服务器请求成功了')
           console.log(response.data)
           _this.items = JSON.parse(response.bodyText).data;
@@ -74,21 +74,21 @@
   }
 </script>
 <style type="text/css">
-  .article-type-container {
+.article-list-item {
+    margin-bottom: 10px;
+}
+.article-type-container {
     font-size: 13px;
     color: #aaa;
-    /*padding: 0 20px;*/
-  }
-  .el-row {
-      padding:5px;
-  }
-  .interEvent{
-      border:none;
-      outline:none;
-      background:none;
-      -webkit-appearance: none;
-  }
-  .tiele{
-      text-align: left;
-  }
+}
+.el-row {
+    padding:5px;
+}
+.interEvent{
+    border:none;
+    outline:none;
+    background:none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
 </style>

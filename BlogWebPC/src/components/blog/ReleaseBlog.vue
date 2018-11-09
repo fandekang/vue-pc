@@ -79,7 +79,7 @@
             ImageExtend: {
               loading: true,
               name: 'img',
-              action: process.env.ROOT_API + "editer/uploadFileForEditor.do",
+              action: process.env.ROOT_API + "article/uploadFileForEditor.do",
               response: (res) => {
                 return res.data
               }
@@ -124,7 +124,8 @@
                 console.log(response.data)
                 this.$alert('发表成功', '', {type: 'success'})
                 let id = JSON.parse(response.bodyText).data.articleid
-                this.$router.push({name: 'BlogLister', params: {id: id}})
+                console.log('==================' + id)
+                this.$router.push({name: 'BlogLister', query: {id: id}})
                 // this.$router.go(-1)
             }
             var errorCallback = (response) => {
@@ -134,8 +135,14 @@
             let title = this.form.title;
             let content = this.content;
             let isoriginal = this.isoriginal;
+            let obj = {
+                "artType": artType,
+                "title": title,
+                "content": content,
+                "isoriginal": isoriginal
+            }
             this.$http.post(process.env.ROOT_API + 'article/createArticle.do',
-                {"artType": artType, "title": title, "content": content, "isoriginal": isoriginal}, {emulateJSON: true}).then(successCallback, errorCallback);
+                obj, {emulateJSON: true}).then(successCallback, errorCallback);
         },
         emit: function() {
           this.content = '';

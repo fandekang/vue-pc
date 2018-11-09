@@ -1,10 +1,10 @@
 <template>
     <div class="main">
-        <panelList-wrapper  :data-url="url" :pager='pager'>
-            <panel-wrapper slot-scope='scope' height="200px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
-                <router-link :to="{name:'BlogLister', query:{id:scope.item.articleid}}" class="header" slot='header' v-html='scope.item.title'>
+        <panelList-wrapper :data-url="url" :pager='pager' :height="height">
+            <panel-wrapper slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
+                <router-link :to="{name:'BlogLister', query:{id:scope.item.articleid}}" class="head" slot='header' v-html='scope.item.title'>
                 </router-link>
-                <div class='body' v-html='formateContent(scope.item.content)'></div>
+                <div class='body'  v-html='formatContent(scope.item.content)'></div>
                 <div slot='footer' class='footer'>
                     <span class="isoriginal">{{ scope.item.isoriginal ? '原创' : '转载' }}</span>&nbsp;&nbsp;<span>{{ scope.item.pubdate}}</span>&nbsp;&nbsp;
                     <el-button type='text' size='mini'><i class='el-icon-view'></i>阅读</el-button>(<span>{{ scope.item.readcount }}</span>)&nbsp;
@@ -12,34 +12,60 @@
                     <hr>
                 </div>
             </panel-wrapper>
-        </panelList-wrapper >
+        </panelList-wrapper>
     </div>
 </template>
 <script type="text/javascript">
-    export default {
-        name: "BlogType",
-        data() {
-            return {
-                url: process.env.ROOT_API + 'article/getBlogListByType.do?artType=' + this.$route.query.type,
-                // url: process.env.ROOT_API + 'article/getMyBlogList.do',
-                pager: {
-                    pageSize: 5,
-                    pageInt: 1
-                }
-            }
-        },
-        methods: {
-            formateContent(content) {
-                if (content.indexOf("img") > -1) {
-                    content = content.replace("img", "span");
-                }
-                if (content.length > 200) {
-                    content = content.substr(0, 200);
-                }
-                return content;
-            }
-        }
+export default {
+  name: "BlogType",
+  mounted() {
+    let _this = this;
+    _this.windowHeight = window.innerHeight;
+
+    window.onresize = () => {
+      _this.windowHeight = window.innerHeight;
+    };
+  },
+  watch: {
+    windowHeight() {
+      this.windowHeight = window.innerHeight;
     }
+  },
+  data() {
+    return {
+      windowHeight: 0,
+      url:
+        process.env.ROOT_API +
+        "article/getBlogListByType.do?artType=" +
+        this.$route.query.type,
+      // url: process.env.ROOT_API + 'article/getMyBlogList.do',
+      pager: {
+        pageSize: 5,
+        pageInt: 1
+      }
+    };
+  },
+  methods: {
+    remove2PortBlank(str) {
+      return str.replace(/^\s*|\s$/g, "");
+    },
+    formatContent(content) {
+      if (!content) return "";
+
+      content = this.remove2PortBlank(content.trim().replace(/<[^>]*>|/g, ""));
+
+      if (content.length > 200) {
+        return content.substr(0, 200) + "</br>...";
+      }
+      return content + "</br>...";
+    }
+  },
+  computed: {
+    height() {
+      return this.windowHeight - 205 + "px";
+    }
+  }
+};
 </script>
 
 <style>
@@ -55,18 +81,20 @@
     .panel-wrapper-body {
         font-size: 14px;
         color: #606266;
-        overflow:hidden;
     }
-    /*.main .cell .table-column-log {*/
-        /*color: #303133;*/
-    /*}*/
-    /*.main .cell .table-column-read {*/
-        /*padding-left: 15px;*/
-    /*}*/
-    /*.main .cell .table-column-comment {*/
-        /*padding-left: 15px;*/
-    /*}*/
-    /*.isoriginal{*/
-        /*font-size:10px;*/
-    /*}*/
+    .panel-wrapper-container {
+        overflow: hidden;
+    }
+/*.main .cell .table-column-log {*/
+/*color: #303133;*/
+/*}*/
+/*.main .cell .table-column-read {*/
+/*padding-left: 15px;*/
+/*}*/
+/*.main .cell .table-column-comment {*/
+/*padding-left: 15px;*/
+/*}*/
+/*.isoriginal{*/
+/*font-size:10px;*/
+/*}*/
 </style>

@@ -28,6 +28,11 @@
                 source: []
             }
         },
+        watch: {
+            dataUrl() {
+                this.loadData();
+            }
+        },
         props: {
             dataJson: Array,
             dataUrl: String,

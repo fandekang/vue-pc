@@ -73,6 +73,8 @@
                 url : process.env.ROOT_API + "main/getCurStaff.do",
                 success(response) {
                     let body = response.bodyText && JSON.parse(response.bodyText);
+                    console.log('===========================')
+                    console.log(body)
                     if (body && body.data) {
                         this.$store.dispatch("loginAction", {
                             staffName: body.data.staffName,

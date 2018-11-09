@@ -2,7 +2,7 @@
     <div class="main">
         <panelList-wrapper :data-url="url" :pager='pager' :height="height">
             <panel-wrapper slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
-                <router-link :to="{path:'Blog', query:{id:scope.item.articleid}}" class="header" slot='header' v-html='scope.item.title'>
+                <router-link @click.native="tapCount(scope.item.articleid)" :to="{path:'Blog', query:{id:scope.item.articleid}}" class="head" slot='header' v-html='scope.item.title'>
                 </router-link>
                 <div class='body' v-html='formatContent(scope.item.content)'></div>
                 <div slot='footer' class='footer'>
@@ -42,6 +42,9 @@
             }
         },
         methods: {
+            tapCount(id) {
+                alert(`在ID为${id}上点击了`)
+            },
             remove2PortBlank(str) {
                 return str.replace(/^\s*|\s$/g, "");
             },
