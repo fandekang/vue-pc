@@ -12,18 +12,16 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
         '/BlogServerPC/*':{ //代理路径
-            // target: 'http://101.37.70.52:8082',
-            // target: 'http://192.168.1.126:8080',
-            target: 'http://192.168.1.134:8080',
+          // target: 'http://101.37.70.52:80',
+            target: 'http://101.37.70.52:8082',
             secure: false,
             changerOrigin:true,   //改变源
         }
     },
-
     // Various Dev Server settings
     // host: '192.168.1.126',
     host: 'localhost', // can be overwritten by process.env.HOST
-    port: 8082, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    port: 8081, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: false,
     errorOverlay: true,
     notifyOnErrors: true,
@@ -59,7 +57,7 @@ module.exports = {
     // Paths
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: './',
 
     /**
      * Source Maps

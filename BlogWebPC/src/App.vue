@@ -49,16 +49,27 @@
 </script>
 
 <style>
-    .el-aside {
-        width: 20% !important;
-        margin-right: 50px;
-        padding: 0 15px;
-        overflow: hidden;
-    }
-
-    * {
-        font-family: 'Avenir', Helvetica, Arial, sans-serif;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
+.el-aside {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 20% !important;
+    margin-right: 50px;
+    padding: 0 15px;
+    overflow: hidden;
+}
+.el-main {
+    margin-left: 300px;
+}
+* {
+    font-family: 'Avenir', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+ul,li {
+  list-style: none;
+}
+.el-main {
+    overflow: visible;
+}
 </style>

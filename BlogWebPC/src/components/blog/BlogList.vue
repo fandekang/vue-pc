@@ -1,14 +1,15 @@
 <template>
     <div class="main">
         <panelList-wrapper :data-url="url" :pager='pager' :height="height">
-            <panel-wrapper slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
-                <router-link @click.native="tapCount(scope.item.articleid)" :to="{path:'Blog', query:{id:scope.item.articleid}}" class="head" slot='header' v-html='scope.item.title'>
+            <panel-wrapper class="article-list-item" slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
+                <router-link :to="{path:'Blog', query:{id:scope.item.articleid}}" class="head" slot='header' v-html='scope.item.title'>
                 </router-link>
                 <div class='body' v-html='formatContent(scope.item.content)'></div>
                 <div slot='footer' class='footer'>
-                    <span class="isoriginal">{{ scope.item.isoriginal ? '原创' : '转载' }}</span>&nbsp;&nbsp;<span>{{ scope.item.pubdate}}</span>&nbsp;&nbsp;
-                    <el-button type='text' size='mini'><i class='el-icon-view'></i>阅读</el-button>(<span>{{ scope.item.readcount }}</span>)&nbsp;
-                    <el-button type='text' size='mini'><i class='el-icon-tickets'></i>评论</el-button>(<span>{{ scope.item.commentcount }}</span>)
+                    <span class="isoriginal">{{ scope.item.isoriginal ? '原创' : '转载' }}</span>&nbsp;&nbsp;<span>{{ scope.item.pubdate}}</span>&nbsp;
+                    <span class="color-def">类型: {{scope.item.arttype}}</span>&nbsp;
+                    <el-button class="color-def" type='text' size='mini'><i class='el-icon-view'></i>阅读</el-button>(<span>{{ scope.item.readcount }}</span>)&nbsp;
+                    <el-button class="color-def" type='text' size='mini'><i class='el-icon-tickets'></i>评论</el-button>(<span>{{ scope.item.commentcount }}</span>)
                 </div>
             </panel-wrapper>
         </panelList-wrapper >
@@ -20,7 +21,6 @@
         mounted() {
             let _this = this;
             _this.windowHeight = window.innerHeight;
-
             window.onresize = () => {
                 _this.windowHeight = window.innerHeight;
             }
@@ -32,7 +32,7 @@
         },
         data() {
             return {
-                url: process.env.ROOT_API + 'article/getPageList.do',
+                url: process.env.ROOT_API + 'article/getBlogList.do',
                 windowHeight: 0,
                 pager: {
                     pageSize: 5,
@@ -42,9 +42,6 @@
             }
         },
         methods: {
-            tapCount(id) {
-                alert(`在ID为${id}上点击了`)
-            },
             remove2PortBlank(str) {
                 return str.replace(/^\s*|\s$/g, "");
             },
@@ -67,30 +64,29 @@
     }
 </script>
 
-<style>
-    .main {
-        margin: 20px 0 0 -20px;
-    }
-    .panel-wrapper-header a {
-        text-decoration: none;
-        font-size: 20px;
-        line-height: 38px;
-        color: #303133;
-    }
-    .panel-wrapper-body {
-        font-size: 14px;
-        color: #606266;
-    }
-    /*.main .cell .table-column-log {*/
-        /*color: #303133;*/
-    /*}*/
-    /*.main .cell .table-column-read {*/
-        /*padding-left: 15px;*/
-    /*}*/
-    /*.main .cell .table-column-comment {*/
-        /*padding-left: 15px;*/
-    /*}*/
-    /*.isoriginal{*/
-        /*font-size:10px;*/
-    /*}*/
+<style scoped>
+.article-list-item {
+    overflow: visible !important;
+}
+.color-def {
+    font-size: 12px;
+    color: #333;
+    cursor: default;
+}
+.color-def:focus, .color-def:hover {
+    color: #333;
+}
+.main {
+    margin: 20px 0 0 -20px;
+}
+.panel-wrapper-header a {
+    text-decoration: none;
+    font-size: 20px;
+    line-height: 38px;
+    color: #303133;
+}
+.panel-wrapper-body {
+    font-size: 14px;
+    color: #606266;
+}
 </style>

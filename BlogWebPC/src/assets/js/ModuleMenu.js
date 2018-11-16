@@ -4,7 +4,7 @@ export default {
         artCount: 0,
         original: 0,
         score: 0,
-        staffImgUrl: process.env.ROOT_API + 'main/getStaffImg.do'
+        staffImgUrl: process.env.ROOT_API + 'main/getStaffImg.do?dt=' + Math.random()
     },
     mutations: {
         loginSuccess(state, opt) {

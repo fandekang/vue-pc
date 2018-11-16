@@ -39,8 +39,8 @@ export default {
                 target: this.$el
             })
             this.$http.post(url, remoteParam, {emulateJSON: true}).then(response => {
-                // console.log("成功");
-                console.log("bodyText = " + response.bodyText)
+                // console.log('=======================请求的数据')
+                // console.log(response.bodyText)
                 const body = JSON.parse(response.bodyText)
 
                 if (body.errorMsg) {

@@ -32,9 +32,9 @@
 </div>
 </template>
 <script type="text/javascript">
-  import 'quill/dist/quill.core.css'
-  import 'quill/dist/quill.snow.css'
-  import 'quill/dist/quill.bubble.css'
+ import 'quill/dist/quill.core.css'
+ import 'quill/dist/quill.snow.css'
+ import 'quill/dist/quill.bubble.css'
 
   import {quillEditor, Quill} from 'vue-quill-editor'
   import {container, ImageExtend, QuillWatch} from 'quill-image-extend-module'
@@ -70,7 +70,7 @@
             title: ''
         },
         isoriginal: '',
-        arttype: [],
+        arttype: [{type: '科技技术'}, {type: '社会百态'}, {type: '公司建设'}, {type: '国际政要'}],
         value1: '',
         content: '文本编辑器',
         // 富文本框参数设置
@@ -97,36 +97,31 @@
       }
     },
     mounted() {
-       this.getAjax();
-        this.content = this.value;
+    //    this.getAjax();
+       this.content = this.value;
     },
     methods: {
       onEditorChange() {
-        console.log("内容改变了");
         this.$emit('input', this.content)
-       // alert("内容改变了");
       },
-        getAjax: function() {
-        let _this = this;
-        var successCallback = (response) => {
-            console.log('服务器请求成功了')
-            console.log(response.data)
-            _this.arttype = JSON.parse(response.bodyText).data;
-        }
-        var errorCallback = (response) => {
-            console.log('服务器请求出错了')
-        }
-        this.$http.get(process.env.ROOT_API + 'article/getTypeList.do').then(successCallback, errorCallback);
-      },
+    //   getAjax: function() {
+    //     let _this = this;
+    //     var successCallback = (response) => {
+    //         console.log('服务器请求成功了')
+    //         console.log(response.data)
+    //         _this.arttype = JSON.parse(response.bodyText).data;
+    //     }
+    //     var errorCallback = (response) => {
+    //         console.log('服务器请求出错了')
+    //     }
+    //     this.$http.get(process.env.ROOT_API + 'article/getTypeList.do').then(successCallback, errorCallback);
+    //   },
        onSubmit: function() {
             var successCallback = (response) => {
                 console.log('服务器请求成功了')
-                console.log(response.data)
                 this.$alert('发表成功', '', {type: 'success'})
                 let id = JSON.parse(response.bodyText).data.articleid
-                console.log('==================' + id)
                 this.$router.push({name: 'BlogLister', query: {id: id}})
-                // this.$router.go(-1)
             }
             var errorCallback = (response) => {
                 console.log('服务器请求出错了')
@@ -160,13 +155,13 @@
   }
 </script>
 
-<style>
+<style scoped>
   .main {
     margin: 20px 0 0 -20px;
   }
-  .ql-editor {
+  /* .ql-editor {
       height: 300px;
-  }
+  } */
   .title{
       font-size: 14px;
       position: relative;

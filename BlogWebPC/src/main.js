@@ -12,6 +12,11 @@ import loadData from '@assets/js/loadData';
 import moduleHead from '@assets/js/ModuleHead';
 import moduleMenu from '@assets/js/ModuleMenu';
 
+import './assets/css/iconfont.css'
+import { emoji } from './assets/js/emoji.js'
+
+Vue.prototype.emoji = emoji
+
 Vue.config.productionTip = false;
 Vue.use(ElementUI);
 Vue.use(ElementFrameWork);

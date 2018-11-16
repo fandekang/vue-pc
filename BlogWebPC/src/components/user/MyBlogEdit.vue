@@ -88,7 +88,6 @@
             }
         },
         mounted() {
-            console.log(this.$route.params.id);
             this.getAjax();
             this.content = this.value;
         },
@@ -102,7 +101,7 @@
                 let _this = this;
                 var successCallback = (response) => {
                     console.log('服务器请求成功了')
-                    console.log(response.data)
+                    // console.log(response.data)
                     _this.article = JSON.parse(response.bodyText).data;
                     _this.content = _this.article.content;
                     _this.title = _this.article.title;
@@ -116,7 +115,7 @@
             onSubmit: function() {
                 var successCallback = (response) => {
                     console.log('服务器请求成功了')
-                    console.log(response.data)
+                    // console.log(response.data)
                 }
                 var errorCallback = (response) => {
                     console.log('服务器请求出错了')

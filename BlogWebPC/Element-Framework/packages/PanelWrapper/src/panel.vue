@@ -161,7 +161,7 @@
         padding: 5px;
         box-sizing: border-box;
         font-size: 13px;
-        overflow: auto;
+        /* overflow: auto; */
     }
 
     .panel-wrapper-container .panel-wrapper-footer {
