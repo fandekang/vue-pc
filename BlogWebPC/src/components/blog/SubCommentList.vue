@@ -5,7 +5,7 @@
                 <img :onerror="errorUserImg" slot="img" :style="{height: 'auto'}" :src="root + 'main/getStaffImg.do?staffID=' + subScope.item.userid + '&dt=' + Math.random()">
                 <div slot='header' class="head" v-html="subScope.item.username + '&nbsp;&nbsp;' + subScope.item.commentdate"></div>
                 <span v-if="subScope.item.replyid" style="color: #409EFF">@{{subScope.item.replyname}}：&nbsp;&nbsp; </span>
-                <div class='body' v-html='emoji(subScope.item.commentcontent)'></div>
+                <div class='body' v-html='subScope.item.commentcontent'></div>
                 <div slot='footer' class='footer'>
                     <el-button type='text' size='mini'><i class='el-icon-star-off'></i>点赞
                     </el-button>
@@ -24,8 +24,8 @@
                                         <div class="emoji-box" v-if="showSubEmoji">
                                             <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showSubEmoji = false">
                                             </el-button>
-                                            <vue-emoji @select="subSelectEmoji">
-                                            </vue-emoji>
+                                            <angus-vue-emoji @select="subSelectEmoji">
+                                            </angus-vue-emoji>
                                         </div>
                                     </transition>
                                 </button>
@@ -34,7 +34,7 @@
                             </quill-editor>
 
                             <div class="emoji-wrapper clearfix">
-                                <el-button type="primary" size="small" @click="reply(subScope.item.fathercommentid, subScope.item.commentid,firstCommentID)" class="submit">回复
+                                <el-button type="primary" size="small" @click="reply(subScope.item.fathercommentid, subScope.item.commentid,commentID)" class="submit">回复
                                 </el-button>
                             </div>
                         </div>
@@ -87,25 +87,24 @@
 <script>
 import loadData from '@assets/js/loadData'
 import defaultImg from '@assets/images/pic01.jpg'
-import vueEmoji from '@components/emoji/emoji'
 import {quillEditor} from 'vue-quill-editor'
 export default {
     name: 'SubCommentList',
     mixins: [loadData],
-    components: {vueEmoji, quillEditor},
+    components: {quillEditor},
     props: {
-        firstCommentID: String,
+        subRemote: String,
         commentID: String
     },
     watch: {
         commentID() { // 监听父组件传来的一级评论ID
             this.subRemoteParam.commentID = this.commentID
-            this.subRemote = process.env.ROOT_API + 'comments/getCommentByCommentID.do?random=' + Math.random()
+            // this.subRemote = process.env.ROOT_API + 'comments/getCommentByCommentID.do?random=' + Math.random()
         }
     },
     data() {
         return {
-            subRemote: process.env.ROOT_API + 'comments/getCommentByCommentID.do',
+            // subRemote: process.env.ROOT_API + 'comments/getCommentByCommentID.do',
             subRemoteParam: {
                 articleID: this.$route.query.id,
                 commentID: ''
@@ -159,7 +158,7 @@ export default {
             let reg = /^<p>|<\/p>$/;
             let quill = this.$refs.replyEditor.quill,
                 range = quill.getSelection();
-            this.replyContent = this.replyContent.replace(reg, '') + this.emoji(code);
+            this.replyContent = this.replyContent.replace(reg, '') + this.$AngusVueEmoji(code);
             setTimeout(function() {
                 quill.setSelection(range.index + 1);
                 console.log("完成");

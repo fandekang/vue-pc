@@ -49,6 +49,9 @@
 </script>
 
 <style>
+/* html, body {
+    overflow-y: hidden;
+} */
 .el-aside {
     position: fixed;
     top: 0;

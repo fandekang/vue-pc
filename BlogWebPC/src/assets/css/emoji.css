@@ -1,0 +1,48 @@
+    .emoji-wrapper {
+        position: relative;
+        margin-top: 20px;
+        margin-bottom: 10px;
+    }
+
+    .iconfont {
+        cursor: pointer;
+        color: #F7BA2A;
+    }
+
+    .emoji-box {
+        position: absolute;
+        z-index: 10;
+        left: 30px;
+        top: -200px;
+        box-shadow: 0 4px 20px 1px rgba(0, 0, 0, 0.2);
+        background: white;
+    }
+
+    .pop-close {
+        position: absolute;
+        border: none;
+        color: #FF4949;
+        right: 12px;
+        top: 12px;
+        z-index: 10;
+    }
+
+    .clearfix::after {
+        content: '';
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+    }
+
+    .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s;
+    }
+
+    .fade-enter, .fade-leave-active {
+        opacity: 0;
+    }
+
+    .fade-move {
+        transition: transform .4s;
+    }

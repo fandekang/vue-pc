@@ -15,6 +15,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-zhishiku-pc-remenwenzhangicon:before { content: "\e650"; }
+
 .icon-shipin:before { content: "\e622"; }
 
 .icon-music:before { content: "\e63d"; }

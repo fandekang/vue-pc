@@ -3,9 +3,7 @@
         <div class="panel-wrapper-img-container" v-if="this.$slots.img" :style="{height: height, width: imgWidth}">
             <slot name="img"></slot>
         </div>
-        <div class="panel-wrapper-container" :style="{
-          left: this.$slots.img ? imgContainerWidth : 0,
-          border: bordered && '1px solid #EAEAEA',
+        <div class="panel-wrapper-container" :style="{left: this.$slots.img ? imgContainerWidth : 0, border: bordered && '1px solid #EAEAEA',
           'border-radius': radius && '5px',
           'background-color': backgroundColor
           }" :class="{

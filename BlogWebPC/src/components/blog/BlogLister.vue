@@ -16,32 +16,74 @@
         <hr>
         <el-row>
             <el-col class="article-content ql-snow">
-                <div ref="articleContent" class="qwer ql-editor" :class="[isReadMore ? 'content-wrapper-th' : 'content-wrapper-more']" v-html="article.content"></div>
+                <div ref="articleHeight">
+                    <div v-if="isReadMore" class="content-wrapper-th" v-html="article.content"></div>
+                    <div v-else class="content-wrapper-more" v-html="article.content"></div>
+                </div>
+                <!-- <div v-if="isReadMore">
+                    <div ref="articleHeight" class="content-wrapper-th" v-html="article.content"></div>
+                </div>
+                <div v-else class="content-wrapper-more" v-html="article.content"></div> -->
                 <div v-if="isReadMore" class="readmore-container">
                     <el-button @click="isReadMore = false" class="readmore">阅读更多</el-button>
                 </div>
             </el-col>
         </el-row>
-        <commentList></commentList>
+                <el-row>
+            <el-col>
+                <div id="toolbar" class="editor-title">
+                    <b style="float: left">发表评论</b>
+                    &nbsp;&nbsp;&nbsp;
+                    <!-- <button> -->
+                        <i class="iconfont el-icon-star-off" @click="showEmoji = !showEmoji"></i>
+                        <transition name="fade" mode="">
+                            <div class="emoji-box" v-if="showEmoji">
+                                <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showEmoji = false">
+                                </el-button>
+                                <angus-vue-emoji @select="selectEmoji">
+                                </angus-vue-emoji>
+                            </div>
+                        </transition>
+                    <!-- </button> -->
+                </div>
+                <quill-editor class="editor-content" v-model="commentContent" ref="commentsEditor" :rows="3" :options="editorOption">
+                </quill-editor>
+            </el-col>
+        </el-row>
+        <el-row>
+            <el-col>
+                <div class="emoji-wrapper clearfix">
+                    <el-button type="primary" size="small" @click="onSubmit" class="submit">提交</el-button>
+                </div>
+            </el-col>
+        </el-row>
+        <commentList :articleID="articleID"></commentList>
     </div>
 </template>
 
 <script>
 import loadData from '@assets/js/loadData'
-import ElButton from '../../../node_modules/element-ui/packages/button/src/button.vue'
-import vueEmoji from '@components/emoji/emoji'
 import {quillEditor} from 'vue-quill-editor'
 import commentList from '@components/blog/CommentList'
 
 export default {
-    components: {ElButton, vueEmoji, quillEditor, commentList},
+    components: {quillEditor, commentList},
     name: 'BlogLister',
     mixins: [loadData],
     data() {
         return {
-            articleHeight: '',
+            height: '',
+            commentContent: '', // 评论内容
+            showEmoji: false,
+            articleID: '',
             isReadMore: true,
-            loadingFlag: true,
+            loadingFlag: false,
+            editorOption:{
+                placeholder: "请编辑内容",
+                modules:{
+                    toolbar: '#toolbar'
+                }
+            },
             article: {
                 title: '',
                 readcount: '',
@@ -51,24 +93,72 @@ export default {
             }
         }
     },
-    mounted() {
-        // let el = document.querySelector('.' + this.$refs.articleContent.className)
-        // let height = document.defaultView.getComputedStyle(el).height
-        this.$nextTick(() => {
-            let height = this.$refs.articleContent.offsetHeight
-            console.log('===========================')
-            console.log(height)
-        })
-        this.articleContent();
-//            console.log(this.$refs.commentsEditor.quill);
+    computed: {
+        // articleHeight() {
+        //     return this.$refs.articleHeight.offsetHeight
+        // }
     },
-    watch: { // 监听路由变化
+    mounted() {
+        // console.log('+++++++++++++++++++++++++++')
+        // console.log(this.$refs.articleHeight.offsetHeight)
+        this.articleContent();
+        this.$refs.commentsEditor.quill.focus() // 评论编辑器获得光标
+    },
+    updated() {
+        // console.log('动态文章内容的高度===================')
+        // console.log(this.$refs.articleHeight.offsetHeight)
+        // console.log(this.$refs)
+        // // 判断文章内容的高度
+        // this.height = this.$refs.articleHeight.offsetHeight
+        // console.log(this.height)
+    },
+    watch: {
+        // 监听路由变化
         $route() {
-            this.remoteParam.articleID = this.$route.query.id
-            this.articleContent()
+            this.articleID = this.$route.query.id
+        },
+        $refs() {
+            this.height = this.$refs.articleHeight.offsetHeight
+            console.log(this.height)
         }
     },
     methods: {
+        // 选择表情框中的表情
+        selectEmoji(code) {
+            // 插入表情
+            let reg = /^<p>|<\/p>$/;
+            let quill = this.$refs.commentsEditor.quill,
+                range = quill.getSelection();
+            this.commentContent = this.commentContent.replace(reg, '') + this.$AngusVueEmoji(code);
+            // this.showEmoji = false;
+            setTimeout(function() {
+                quill.setSelection(range.index + 1);
+                // console.log("完成");
+            }, 100)
+        },
+        // 发表评论
+        onSubmit: function() {
+            if (this.commentContent !== '') {
+                let url = process.env.ROOT_API + 'comments/releaseComment.do',
+                    param = {articleID: this.$route.query.id, content:this.commentContent},
+                    success = () => {
+                        this.$message.success('发表成功')
+                        this.commentContent = ''
+                        this.remote = process.env.ROOT_API +
+                        'comments/getSuperCommentListByArtID.do'
+                        this.loadingFlag = false
+                    },
+                    error = () => {
+                        this.$message.error('发表失败')
+                    }
+                // this.loadingFlag = true
+                // console.log(this.commentContent)
+                this.sendPost({url, param, success, error})
+            }
+            else {
+                this.$alert('请输入您的评论')
+            }
+        },
         // 请求文章内容
         articleContent() {
             let _this = this,
@@ -84,56 +174,72 @@ export default {
     }
 }
 </script>
+<style>
+/* .icon-shipin {
+    color: red !important;
+} */
+.editor-content .ql-container.ql-snow {
+    border: none !important;
+}
+</style>
 
 <style scoped>
-    .main {
-        /* margin: 20px 0 0 -20px; */
-        width: 780px;
-    }
+@import '../../assets/css/emoji.css';
+.main {
+    /* margin: 20px 0 0 -20px; */
+    width: 780px;
+}
+.editor-title {
+    background: #f1f1eb;
+    border: none;
+}
+.editor-content {
+    border: 1px solid #fff5f5;
+}
 
-    .main .readcount, .main .author {
-        float: right;
-        line-height: 1;
-    }
+.main .readcount, .main .author {
+    float: right;
+    line-height: 1;
+}
 
-    .title {
-        font-size: 15px;
-        color: #aaa;
-    }
+.title {
+    font-size: 15px;
+    color: #aaa;
+}
 
-    .article-content {
-        position: relative;
-        margin-bottom: 20px;
-    }
+.article-content {
+    /* position: relative; */
+    margin-bottom: 20px;
+}
 
-    .content-wrapper-th {
-        max-height: 500px;
-        overflow: hidden;
-    }
+.content-wrapper-th {
+    max-height: 500px;
+    overflow: hidden;
+}
 
-    .content-wrapper-more {
-        /* max-height: auto; */
-        overflow: visible;
-    }
+.content-wrapper-more {
+    height: auto;
+}
 
-    .readmore-container {
-        position: absolute;
-        bottom: 0px;
-        left: 0;
-        display: flex;
-        justify-content: center;
-        height: 50px;
-        width: 100%;
-        background: linear-gradient(-180deg,rgba(255,255,255,0) 0%,#fff 70%);
-    }
+.readmore-container {
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    height: 50px;
+    width: 100%;
+    background: linear-gradient(-180deg,rgba(255,255,255,0) 0%,#fff 70%);
+}
 
-    .readmore-container .readmore {
-        color: #ca0c16;
-        border: 1px solid #ca0c16;
-    }
+.readmore-container .readmore {
+    color: #ca0c16;
+    border: 1px solid #ca0c16;
+}
 
-    .readmore-container .readmore:hover {
-        background: #ca0c16;
-        color: #fff;
-    }
+.readmore-container .readmore:hover {
+    background: #ca0c16;
+    color: #fff;
+}
 </style>
