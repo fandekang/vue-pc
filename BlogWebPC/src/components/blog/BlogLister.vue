@@ -17,16 +17,16 @@
         <el-row>
             <el-col class="article-content ql-snow">
                 <div ref="articleHeight">
-                    <div v-if="isReadMore" class="content-wrapper-th" v-html="article.content"></div>
-                    <div v-else class="content-wrapper-more" v-html="article.content"></div>
+                    <!-- <div v-if="isReadMore" class="content-wrapper-th" v-html="article.content"></div> -->
+                    <div ref="articleCon" class="content-wrapper-more" v-html="article.content"></div>
                 </div>
                 <!-- <div v-if="isReadMore">
                     <div ref="articleHeight" class="content-wrapper-th" v-html="article.content"></div>
                 </div>
                 <div v-else class="content-wrapper-more" v-html="article.content"></div> -->
-                <div v-if="isReadMore" class="readmore-container">
+                <!-- <div v-if="isReadMore" class="readmore-container">
                     <el-button @click="isReadMore = false" class="readmore">阅读更多</el-button>
-                </div>
+                </div> -->
             </el-col>
         </el-row>
                 <el-row>
@@ -34,9 +34,8 @@
                 <div id="toolbar" class="editor-title">
                     <b style="float: left">发表评论</b>
                     &nbsp;&nbsp;&nbsp;
-                    <!-- <button> -->
-                        <i class="iconfont el-icon-star-off" @click="showEmoji = !showEmoji"></i>
-                        <transition name="fade" mode="">
+                        <i class="iconfont icon-biaoqing" @click="showEmoji = !showEmoji"></i>
+                        <transition name="fade">
                             <div class="emoji-box" v-if="showEmoji">
                                 <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showEmoji = false">
                                 </el-button>
@@ -44,7 +43,6 @@
                                 </angus-vue-emoji>
                             </div>
                         </transition>
-                    <!-- </button> -->
                 </div>
                 <quill-editor class="editor-content" v-model="commentContent" ref="commentsEditor" :rows="3" :options="editorOption">
                 </quill-editor>
@@ -57,7 +55,7 @@
                 </div>
             </el-col>
         </el-row>
-        <commentList :articleID="articleID"></commentList>
+        <commentList :remote="remote" :articleID="articleID"></commentList>
     </div>
 </template>
 
@@ -72,6 +70,7 @@ export default {
     mixins: [loadData],
     data() {
         return {
+            remote: process.env.ROOT_API + 'comments/getSuperCommentListByArtID.do',
             height: '',
             commentContent: '', // 评论内容
             showEmoji: false,
@@ -93,33 +92,18 @@ export default {
             }
         }
     },
-    computed: {
-        // articleHeight() {
-        //     return this.$refs.articleHeight.offsetHeight
-        // }
-    },
     mounted() {
-        // console.log('+++++++++++++++++++++++++++')
-        // console.log(this.$refs.articleHeight.offsetHeight)
         this.articleContent();
         this.$refs.commentsEditor.quill.focus() // 评论编辑器获得光标
     },
-    updated() {
-        // console.log('动态文章内容的高度===================')
-        // console.log(this.$refs.articleHeight.offsetHeight)
-        // console.log(this.$refs)
-        // // 判断文章内容的高度
-        // this.height = this.$refs.articleHeight.offsetHeight
-        // console.log(this.height)
-    },
     watch: {
+        // article() {
+        //     console.log(this.$refs.articleCon)
+        //     console.log(this.$refs.articleCon.clientHeight)
+        // },
         // 监听路由变化
         $route() {
             this.articleID = this.$route.query.id
-        },
-        $refs() {
-            this.height = this.$refs.articleHeight.offsetHeight
-            console.log(this.height)
         }
     },
     methods: {
@@ -130,13 +114,14 @@ export default {
             let quill = this.$refs.commentsEditor.quill,
                 range = quill.getSelection();
             this.commentContent = this.commentContent.replace(reg, '') + this.$AngusVueEmoji(code);
-            // this.showEmoji = false;
+            console.log(this.$refs.commentsEditor)
+            console.log(range)
             setTimeout(function() {
                 quill.setSelection(range.index + 1);
-                // console.log("完成");
+                console.log("完成");
             }, 100)
         },
-        // 发表评论
+        // 提交评论
         onSubmit: function() {
             if (this.commentContent !== '') {
                 let url = process.env.ROOT_API + 'comments/releaseComment.do',
@@ -145,14 +130,11 @@ export default {
                         this.$message.success('发表成功')
                         this.commentContent = ''
                         this.remote = process.env.ROOT_API +
-                        'comments/getSuperCommentListByArtID.do'
-                        this.loadingFlag = false
+                        'comments/getSuperCommentListByArtID.do?random=' + Math.random()
                     },
                     error = () => {
                         this.$message.error('发表失败')
                     }
-                // this.loadingFlag = true
-                // console.log(this.commentContent)
                 this.sendPost({url, param, success, error})
             }
             else {
@@ -164,7 +146,14 @@ export default {
             let _this = this,
                 artUrl = process.env.ROOT_API + 'article/getArticleByID.do?objid=' + _this.$route.query.id + '&random=' + Math.random(),
                 artSuccess = response => {
-                    _this.article = JSON.parse(response.bodyText).data
+                    this.article = JSON.parse(response.bodyText).data
+                    this.articleBody = this.article.content
+                    console.log(this.$refs.articleCon.clientHeight)
+                    console.log(this.$refs.articleCon.offsetHeight)
+                    let hei = document.querySelector('.content-wrapper-more')
+                    console.log(hei.offsetHeight)
+                    console.log(hei.clientHeight)
+                    // console.log(this.articleBody)
                     setTimeout(() => {
                         _this.loadingFlag = false
                     }, 500)
@@ -175,9 +164,15 @@ export default {
 }
 </script>
 <style>
-/* .icon-shipin {
-    color: red !important;
-} */
+.editor-title {
+    background: #f1f1eb;
+    border: none;
+}
+
+.editor-content {
+    border: 1px solid #fff5f5;
+}
+
 .editor-content .ql-container.ql-snow {
     border: none !important;
 }
@@ -188,13 +183,6 @@ export default {
 .main {
     /* margin: 20px 0 0 -20px; */
     width: 780px;
-}
-.editor-title {
-    background: #f1f1eb;
-    border: none;
-}
-.editor-content {
-    border: 1px solid #fff5f5;
 }
 
 .main .readcount, .main .author {

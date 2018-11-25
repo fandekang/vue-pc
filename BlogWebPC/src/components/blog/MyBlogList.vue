@@ -1,12 +1,12 @@
 <template>
     <div class="main">
-        <div class="edit-wrapper">
+        <!-- <div class="edit-wrapper">
             <div>
                 <el-checkbox v-show="checkedItems" v-model="checkAll"  ></el-checkbox>
                 <span class="delete-items" v-show="checkedItems" @click="alert(1)">删除选中项</span>
             </div>
             <el-button class="bulk-edit" @click="checkedItems = !checkedItems">批量编辑</el-button>
-        </div>
+        </div> -->
 
         <panelList-wrapper @panelData="getPanelData" class="fandekang" :data-url="url" :pager='pager' :height="height" :checkall="checkAll" @checkAll="getCheckAll">
                 <panel-wrapper class="panel-wrapper" slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>

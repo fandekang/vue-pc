@@ -9,16 +9,11 @@ import Settings from '@components/user/Settings';
 import Blog from '@components/blog/BlogLister';
 import Edit from '@components/user/MyBlogEdit';
 import BlogType from '@components/blog/BlogType';
-import test from '@components/blog/test';
+
 Vue.use(Router);
 
 export default new Router({
     routes: [
-        {
-            path: '/test',
-            name: 'test',
-            component: test
-        },
         {
             path: '/',
             name: 'BlogList',

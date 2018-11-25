@@ -15,12 +15,11 @@
                     (<span>{{ subScope.item.receivecount }}</span>)
                     <transition name="el-zoom-in-top">
                         <div v-show="otherReceiveShowIndex==subScope.item.commentdate">
-                            <div id="toolbar" class="ql-toolbar ql-snow" style="line-height: 26px">
+                            <div :id="'toolbar-' + subScope.index" class="editor-title" style="line-height: 26px">
                                 <b style="float: left">回复内容</b>
                                 &nbsp;&nbsp;&nbsp;
-                                <button>
-                                    <i class="icon iconfont icon-face" @click="showSubEmoji = !showSubEmoji"></i>
-                                    <transition name="fade" mode="">
+                                    <i class="iconfont icon-biaoqing" @click="showEmoji = !showEmoji"></i>
+                                    <transition name="fade">
                                         <div class="emoji-box" v-if="showSubEmoji">
                                             <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showSubEmoji = false">
                                             </el-button>
@@ -28,13 +27,16 @@
                                             </angus-vue-emoji>
                                         </div>
                                     </transition>
-                                </button>
                             </div>
-                            <quill-editor v-model="replyContent" ref="replyEditor" :rows="3" :content="replyContent" :options="editorOption">
+                            <quill-editor class="editor-content"
+                            v-model="subScope.replyCon"
+                            ref="replyEditor"
+                            :rows="3"
+                            :options="editorOpts(subScope.index)">
                             </quill-editor>
 
                             <div class="emoji-wrapper clearfix">
-                                <el-button type="primary" size="small" @click="reply(subScope.item.fathercommentid, subScope.item.commentid,commentID)" class="submit">回复
+                                <el-button type="primary" size="small" @click="subReply(subScope.item.fathercommentid, subScope.item.commentid,commentID,subScope.replyCon)" class="submit">回复
                                 </el-button>
                             </div>
                         </div>
@@ -42,46 +44,6 @@
                 </div>
             </panel-wrapper>
         </panelList-wrapper>
-        <!-- <ul v-if="subData" v-show="subreceiveShowIndex==scope.item.commentid" v-loading.lock="isSubCommentListLoading">
-                <li class="sub-comment-item" v-for="(item, index) in subData" :key="index">
-                        <div class="panel-wrapper-img-container"><img class="sub-staff" :onerror="errorUserImg" :src="root + 'main/getStaffImg.do?staffID=' + item.userid + '&dt=' + Math.random()">
-                        </div>
-                        <div class="panel-wrapper-container">
-                            <div class="head">{{item.username}}&nbsp;&nbsp;{{item.commentdate}}</div>
-                            <div class="body"><span v-if="item.replyid" style="color: #409EFF">@{{item.replyname}}：&nbsp;&nbsp; </span><span v-html="emoji(item.commentcontent)"></span></div>
-                            <div class="footer">
-                                <el-button type='text' size='mini'><i class='el-icon-star-off'>点赞</i>
-                                </el-button>
-                                (<span>{{item.praisecount }}</span>)&nbsp;
-                                <el-button type='text' size='mini' @click="showOtherReveicer(item.commentdate)">
-                                    <i class='el-icon-edit'></i>回复
-                                </el-button>
-                                (<span>{{item.receivecount }}</span>)
-                            </div>
-                        </div>
-
-                    <transition name="el-zoom-in-top">
-                        <div v-show="otherReceiveShowIndex==item.commentdate">
-                            <el-input v-model="subReceiver" type="textarea" :autosize="{ minRows: 3, maxRows: 5}" placeholder="请输入评论内容">
-                            </el-input>
-                            <div class="emoji-wrapper clearfix">
-                                <i class="icon iconfont icon-face" @click="showSubEmoji = !showSubEmoji"></i>
-                                <el-button type="primary" size="small" @click="subReply(item.fathercommentid, item.commentid,scope.item.commentid)" class="submit">回复
-                                </el-button>
-                                <transition name="fade" mode="">
-                                    <div class="emoji-box" v-if="showSubEmoji">
-                                        <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showSubEmoji = false">
-                                        </el-button>
-                                        <vue-emoji @select="subSelectEmoji">
-                                        </vue-emoji>
-                                        <span class="pop-arrow arrow"></span>
-                                    </div>
-                                </transition>
-                            </div>
-                        </div>
-                    </transition>
-                </li>
-            </ul> -->
     </div>
 </template>
 <script>
@@ -99,18 +61,15 @@ export default {
     watch: {
         commentID() { // 监听父组件传来的一级评论ID
             this.subRemoteParam.commentID = this.commentID
-            // this.subRemote = process.env.ROOT_API + 'comments/getCommentByCommentID.do?random=' + Math.random()
         }
     },
     data() {
         return {
-            // subRemote: process.env.ROOT_API + 'comments/getCommentByCommentID.do',
             subRemoteParam: {
                 articleID: this.$route.query.id,
                 commentID: ''
             },
             showSubEmoji: false,
-            replyContent: '',
             otherReceiveShowIndex: 0, // 是否展示其它回复框
             errorUserImg: `this.src='${defaultImg}'`,
             root: process.env.ROOT_API,
@@ -118,28 +77,29 @@ export default {
                 pageSizes: [2, 5],
                 pageSize: 2,
                 pageInt: 1
-            },
-            editorOption:{
-                placeholder: "请编辑内容",
-                modules:{
-                    toolbar: '#toolbar'
-                }
             }
         }
     },
     methods: {
+        editorOpts(index) {
+            return {
+                placeholder: "请编辑回复内容" + index,
+                modules:{
+                    toolbar: '#toolbar-' + index
+                }
+            }
+        },
         // 回复二级评论以及其他评论
-        reply(commentsID, subCommentsID, commentid) {
-            if (this.replyContent !== '') {
+        subReply(commentsID, subCommentsID, commentid, replyCon) {
+            if (replyCon !== '') {
                 let url = process.env.ROOT_API + 'comments/receiveSubComments.do',
                     param = {
                         articleID: this.$route.query.id,
-                        content: this.replyContent,
+                        content: replyCon,
                         commentsID: commentsID,
                         subCommentsID: subCommentsID
                     },
                     success = () => {
-                        this.replyContent = ''
                         this.subRemote = process.env.ROOT_API + 'comments/getCommentByCommentID.do?random=' + Math.random()
                         this.otherReceiveShowIndex = -1
                     },
@@ -155,10 +115,10 @@ export default {
         // 选择子级表情框中的表情
         subSelectEmoji(code) {
             // 插入表情
-            let reg = /^<p>|<\/p>$/;
+            // let reg = /^<p>|<\/p>$/;
             let quill = this.$refs.replyEditor.quill,
                 range = quill.getSelection();
-            this.replyContent = this.replyContent.replace(reg, '') + this.$AngusVueEmoji(code);
+            // this.replyContent = this.replyContent.replace(reg, '') + this.$AngusVueEmoji(code);
             setTimeout(function() {
                 quill.setSelection(range.index + 1);
                 console.log("完成");

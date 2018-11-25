@@ -15,6 +15,8 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-biaoqing:before { content: "\e681"; }
+
 .icon-zhishiku-pc-remenwenzhangicon:before { content: "\e650"; }
 
 .icon-shipin:before { content: "\e622"; }
@@ -32,8 +34,6 @@
 .icon-tupian:before { content: "\e604"; }
 
 .icon-xin-1:before { content: "\e605"; }
-
-.icon-face:before { content: "\e657"; }
 
 .icon-loading:before { content: "\e64e"; }
 

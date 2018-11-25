@@ -28,12 +28,11 @@
                         </transition>
                         <transition  name="el-zoom-in-top">
                             <div v-show="receiveShowIndex==scope.item.commentid">
-                                <div :id="'toolbar-' + scope.index"  class="ql-toolbar ql-snow" style="line-height: 26px">
+                                <div :id="'toolbar-' + scope.index"  class="editor-title" style="line-height: 26px">
                                     <b style="float: left">回复内容</b>
                                     &nbsp;&nbsp;&nbsp;
-                                    <button>
-                                        <i class="icon iconfont icon-face" @click="showSubEmoji = !showSubEmoji"></i>
-                                        <transition name="fade" mode="">
+                                        <i class="iconfont icon-biaoqing" @click="showSubEmoji = !showSubEmoji"></i>
+                                        <transition name="fade">
                                             <div class="emoji-box" v-if="showSubEmoji">
                                                 <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showSubEmoji = false">
                                                 </el-button>
@@ -42,16 +41,15 @@
                                                 </angus-vue-emoji>
                                             </div>
                                         </transition>
-                                    </button>
                                 </div>
-                                <quill-editor :rows="3"
+                                <quill-editor class="editor-content" :rows="3"
                                 v-model="scope.artCon"
                                 :options="editorOpts(scope.index)"
                                 @blur="onEditorBlur($event)"
                                 @change="onEditorChange($event)">
                                 </quill-editor>
 
-                                <div class="clearfix">
+                                <div class="emoji-wrapper clearfix">
                                     <el-button type="primary" size="small" @click="reply(scope.item.commentid, scope.artCon)" class="submit">回复
                                     </el-button>
                                 </div>
@@ -74,6 +72,7 @@ export default {
     mixins: [loadData],
     components: {quillEditor, subComment},
     props: {
+        remote: String,
         articleID: String
     },
     watch: {
@@ -85,10 +84,10 @@ export default {
         return {
             showSubEmoji: false,
             subreceiveShowIndex: 0, // 是否展示二级评论列表
-            receiveShowIndex: 0,
+            receiveShowIndex: 0, // 是否展示回复框
             errorUserImg: `this.src='${defaultImg}'`,
             root: process.env.ROOT_API,
-            remote: process.env.ROOT_API + 'comments/getSuperCommentListByArtID.do',
+            // remote: process.env.ROOT_API + 'comments/getSuperCommentListByArtID.do',
             remoteParam: {
                 articleID: this.$route.query.id
             },
@@ -102,12 +101,6 @@ export default {
         }
     },
     methods: {
-        // createArticleCon(val) {
-        //     for(let i = 0; i < val; i++) {
-        //         this.$set('replyContent' + i, '')
-        //     }
-        //     console.log(val)
-        // },
         editorOpts(index) {
             return {
                 placeholder: "请编辑回复内容" + index,
@@ -177,30 +170,29 @@ export default {
         },
         // 回复一级评论 commentid:一级评论ID， artCon:回复内容
         reply: function(commentid, artCon) {
-            console.log(artCon)
-            // if (artCon !== '') {
-            //     let url = process.env.ROOT_API + 'comments/receiveComments.do',
-            //         param = {
-            //             articleID: this.$route.query.id,
-            //             commentsID: commentid,
-            //             content: artCon
-            //         },
-            //         success = () => {
-            //             this.receiveShowIndex = -1
-            //             // this.subreceiveShowIndex = commentid //展开二级评论列表
-            //             this.remote =
-            //                 process.env.ROOT_API +
-            //                 'comments/getSuperCommentListByArtID.do?random=' +
-            //                 Math.random()
-            //         },
-            //         error = () => {
-            //             this.$message.error('回复失败')
-            //         }
-            //     this.sendPost({url, param, success, error})
-            // }
-            // else {
-            //     this.$alert('请输入您的评论')
-            // }
+            if (artCon !== '') {
+                let url = process.env.ROOT_API + 'comments/receiveComments.do',
+                    param = {
+                        articleID: this.$route.query.id,
+                        commentsID: commentid,
+                        content: artCon
+                    },
+                    success = () => {
+                        this.receiveShowIndex = -1
+                        // this.subreceiveShowIndex = commentid // 展开二级评论列表
+                        this.remote =
+                            process.env.ROOT_API +
+                            'comments/getSuperCommentListByArtID.do?random=' +
+                            Math.random()
+                    },
+                    error = () => {
+                        this.$message.error('回复失败')
+                    }
+                this.sendPost({url, param, success, error})
+            }
+            else {
+                this.$alert('请输入您的评论')
+            }
         }
     }
 }
