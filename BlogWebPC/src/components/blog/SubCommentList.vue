@@ -10,18 +10,18 @@
                     <el-button type='text' size='mini'><i class='el-icon-star-off'></i>点赞
                     </el-button>
                     (<span>{{ subScope.item.praisecount }}</span>)&nbsp;
-                    <el-button type='text' size='mini' @click="showOtherReveicer(subScope.item.commentdate)"><i class='el-icon-edit'></i>回复
+                    <el-button type='text' size='mini' @click="showOtherReveicer(subScope.item.commentid, subScope.index)"><i class='el-icon-edit'></i>回复
                     </el-button>
                     (<span>{{ subScope.item.receivecount }}</span>)
                     <transition name="el-zoom-in-top">
-                        <div v-show="otherReceiveShowIndex==subScope.item.commentdate">
-                            <div :id="'toolbar-' + subScope.index" class="editor-title" style="line-height: 26px">
-                                <b style="float: left">回复内容</b>
+                        <div class="emoji-wrapper" v-show="otherReceiveShowIndex==subScope.item.commentid">
+                            <div :id="'toolbar-' + subScope.index" class="editor-title emoji-wrapper ql-toolbar ql-snow" style="line-height: 26px">
+                                <b style="float: left">回复</b>
                                 &nbsp;&nbsp;&nbsp;
-                                    <i class="iconfont icon-biaoqing" @click="showEmoji = !showEmoji"></i>
+                                    <i class="iconfont icon-biaoqing" @click="showOtherEmojiBox(subScope.index)"></i>
                                     <transition name="fade">
-                                        <div class="emoji-box" v-if="showSubEmoji">
-                                            <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showSubEmoji = false">
+                                        <div class="emoji-box" v-if="showOtherEmoji">
+                                            <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showOtherEmoji = false">
                                             </el-button>
                                             <angus-vue-emoji @select="subSelectEmoji">
                                             </angus-vue-emoji>
@@ -29,14 +29,14 @@
                                     </transition>
                             </div>
                             <quill-editor class="editor-content"
-                            v-model="subScope.replyCon"
-                            ref="replyEditor"
+                            v-model="subCommentCon[subScope.index]"
+                            :ref="'subReplyEditor' + subScope.index"
                             :rows="3"
                             :options="editorOpts(subScope.index)">
                             </quill-editor>
 
                             <div class="emoji-wrapper clearfix">
-                                <el-button type="primary" size="small" @click="subReply(subScope.item.fathercommentid, subScope.item.commentid,commentID,subScope.replyCon)" class="submit">回复
+                                <el-button type="primary" size="small" @click="subReply(subScope.item.fathercommentid, subScope.item.commentid,commentID)" class="submit">回复
                                 </el-button>
                             </div>
                         </div>
@@ -65,11 +65,13 @@ export default {
     },
     data() {
         return {
+            subCommentIndex: -1,
+            subCommentCon: {},
             subRemoteParam: {
                 articleID: this.$route.query.id,
                 commentID: ''
             },
-            showSubEmoji: false,
+            showOtherEmoji: false,
             otherReceiveShowIndex: 0, // 是否展示其它回复框
             errorUserImg: `this.src='${defaultImg}'`,
             root: process.env.ROOT_API,
@@ -81,26 +83,30 @@ export default {
         }
     },
     methods: {
+        showOtherEmojiBox(index) {
+            this.showOtherEmoji = !this.showOtherEmoji
+            this.$refs['subReplyEditor' + this.subCommentIndex].quill.focus()
+        },
         editorOpts(index) {
             return {
-                placeholder: "请编辑回复内容" + index,
+                placeholder: "请编辑回复内容",
                 modules:{
                     toolbar: '#toolbar-' + index
                 }
             }
         },
         // 回复二级评论以及其他评论
-        subReply(commentsID, subCommentsID, commentid, replyCon) {
-            if (replyCon !== '') {
+        subReply(commentsID, subCommentsID, commentid) {
+            if (this.subCommentCon[this.subCommentIndex] !== '') {
                 let url = process.env.ROOT_API + 'comments/receiveSubComments.do',
                     param = {
                         articleID: this.$route.query.id,
-                        content: replyCon,
+                        content: this.subCommentCon[this.subCommentIndex],
                         commentsID: commentsID,
                         subCommentsID: subCommentsID
                     },
                     success = () => {
-                        this.subRemote = process.env.ROOT_API + 'comments/getCommentByCommentID.do?random=' + Math.random()
+                        this.$emit('refreshSubURL')
                         this.otherReceiveShowIndex = -1
                     },
                     error = () => {
@@ -112,20 +118,30 @@ export default {
                 this.$alert('请输入您的评论')
             }
         },
-        // 选择子级表情框中的表情
+        // 选择表情
         subSelectEmoji(code) {
             // 插入表情
-            // let reg = /^<p>|<\/p>$/;
-            let quill = this.$refs.replyEditor.quill,
+            let reg = /^<p>|<\/p>$/;
+            let quill = this.$refs['subReplyEditor' + this.subCommentIndex].quill,
                 range = quill.getSelection();
-            // this.replyContent = this.replyContent.replace(reg, '') + this.$AngusVueEmoji(code);
+            if(this.subCommentCon[this.subCommentIndex]) {
+                this.subCommentCon[this.subCommentIndex] = this.subCommentCon[this.subCommentIndex].replace(reg, '') + this.$AngusVueEmoji(code);
+            }
+            else {
+                 this.subCommentCon[this.subCommentIndex] = this.$AngusVueEmoji(code)
+            }
+
+            this.showOtherEmoji = false
+
             setTimeout(function() {
                 quill.setSelection(range.index + 1);
-                console.log("完成");
+                // console.log("完成");
             }, 100)
         },
         // 是否展示其它回复框
-        showOtherReveicer(date) {
+        showOtherReveicer(date, index) {
+            this.subCommentIndex = index
+            this.$refs['subReplyEditor' + this.subCommentIndex].quill.focus()
             if (this.otherReceiveShowIndex === date) {
                 this.otherReceiveShowIndex = -1
             }
@@ -140,8 +156,9 @@ export default {
                     objid: value
                 },
                 success = (data) => {
+                    console.log(data)
                     // 评论刷新
-                    this.remote = process.env.ROOT_API + 'comments/getSuperCommentListByArtID.do?random=' + Math.random()
+                    this.$emit('refreshSubURL')
                 },
                 error = () => {
                     console.log('点赞失败')
@@ -155,7 +172,7 @@ export default {
     .emoji-wrapper {
         position: relative;
         margin-top: 20px;
-        margin-bottom: 10px;
+        /* margin-bottom: 10px; */
     }
 
     .iconfont {

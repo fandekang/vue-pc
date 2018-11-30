@@ -11,7 +11,6 @@ import resource from 'vue-resource';
 import loadData from '@assets/js/loadData';
 import moduleHead from '@assets/js/ModuleHead';
 import moduleMenu from '@assets/js/ModuleMenu';
-
 import './assets/css/iconfont.css'
 import angusVueEmoji from 'angus-vue-emoji';
 
@@ -63,10 +62,7 @@ router.beforeEach((to, from, next) => {
                 next();
             },
             reject(response) {
-                console.log('====================================')
-                console.log(response)
                 if (response.status === 604) {
-                    console.log("您还未登陆或者已经登陆超时")
                     vm.$message.error("您还未登陆或者已经登陆超时");
                     store.commit("toggleLoginDialog", {visible: true});
                     next({path: from.path, query: from.query});

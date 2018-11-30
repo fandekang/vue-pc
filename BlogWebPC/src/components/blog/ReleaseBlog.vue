@@ -1,41 +1,77 @@
 <template>
-<div class="main">
-
+  <div class="main">
     <el-form :inline="true">
-        <el-form-item label="原创">
-            <el-radio-group v-model="isoriginal">
-                <el-radio label="是"></el-radio>
-                <el-radio label="否"></el-radio>
-            </el-radio-group>
-        </el-form-item>
-        <el-form-item>
-            文章分类&nbsp;&nbsp;&nbsp;
-            <el-select  v-model="value1" clearable placeholder="文章分类">
-                <el-option :label="item.type" :value="item.type"  :key="item.type" v-for="item in arttype"></el-option>
-            </el-select>
-        </el-form-item>
-        <span class="title">标题&nbsp;&nbsp;</span>
-        <el-form-item>
-             <el-input  v-model="form.title" placeholder="文章标题" clearable></el-input>
-        </el-form-item>
+      <el-form-item label="原创">
+        <el-radio-group v-model="isoriginal">
+          <el-radio label="是"></el-radio>
+          <el-radio label="否"></el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item>
+        文章分类&nbsp;&nbsp;&nbsp;
+        <el-select
+          v-model="value1"
+          clearable
+          placeholder="文章分类"
+        >
+          <el-option
+            :label="item.type"
+            :value="item.type"
+            :key="item.type"
+            v-for="item in arttype"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <span class="title">标题&nbsp;&nbsp;</span>
+      <el-form-item>
+        <el-input
+          v-model="form.title"
+          placeholder="文章标题"
+          clearable
+        ></el-input>
+      </el-form-item>
+      <span class="title">文章封面&nbsp;&nbsp;</span>
+      <el-form-item>
+        <el-upload
+          class="avatar-uploader"
+          :action="articleCover"
+          :show-file-list="false"
+          :on-success="handleAvatarSuccess"
+        >
+          <img
+            v-if="imageUrl"
+            :src="imageUrl"
+            class="avatar"
+          >
+          <i
+            v-else
+            class="el-icon-plus avatar-uploader-icon"
+          ></i>
+        </el-upload>
+      </el-form-item>
     </el-form>
-    <quill-editor v-model="content"
-                 ref="myTextEditor"
-                   :rows="20"
-                :content="content"
-                :options = "editorOption"
-                @change="onEditorChange($event)">
-  </quill-editor>
-    <br/>
-    <el-button type="primary" @click="onSubmit">发表博客</el-button>
+    <quill-editor
+      class="quill-editor-content"
+      v-model="content"
+      ref="myTextEditor"
+      :rows="20"
+      :content="content"
+      :options="editorOption"
+    >
+    </quill-editor>
+    <br />
+    <el-button
+      type="primary"
+      @click="onSubmit"
+    >发表博客</el-button>
     <el-button @click="emit">清空</el-button>
-</div>
+  </div>
 </template>
 <script type="text/javascript">
- import 'quill/dist/quill.core.css'
- import 'quill/dist/quill.snow.css'
- import 'quill/dist/quill.bubble.css'
-
+  import 'quill/dist/quill.core.css'
+  import 'quill/dist/quill.snow.css'
+  import 'quill/dist/quill.bubble.css'
+  import loadData from '@assets/js/loadData'
   import {quillEditor, Quill} from 'vue-quill-editor'
   import {container, ImageExtend, QuillWatch} from 'quill-image-extend-module'
 
@@ -43,6 +79,7 @@
 
   export default {
     name: "ReleaseBlog",
+    mixins: [loadData],
     components: {quillEditor},
       props: {
           value: {
@@ -66,6 +103,8 @@
       },
     data() {
       return {
+        articleCover: process.env.ROOT_API + "article/uploadFileForEditor.do",
+        imageUrl: '',
         form: {
             title: ''
         },
@@ -75,6 +114,7 @@
         content: '文本编辑器',
         // 富文本框参数设置
         editorOption: {
+          placeholder: '请编辑内容...',
           modules: {
             ImageExtend: {
               loading: true,
@@ -97,35 +137,29 @@
       }
     },
     mounted() {
-    //    this.getAjax();
        this.content = this.value;
     },
     methods: {
-      onEditorChange() {
-        this.$emit('input', this.content)
-      },
-    //   getAjax: function() {
-    //     let _this = this;
-    //     var successCallback = (response) => {
-    //         console.log('服务器请求成功了')
-    //         console.log(response.data)
-    //         _this.arttype = JSON.parse(response.bodyText).data;
-    //     }
-    //     var errorCallback = (response) => {
-    //         console.log('服务器请求出错了')
-    //     }
-    //     this.$http.get(process.env.ROOT_API + 'article/getTypeList.do').then(successCallback, errorCallback);
-    //   },
-       onSubmit: function() {
-            var successCallback = (response) => {
-                console.log('服务器请求成功了')
-                this.$alert('发表成功', '', {type: 'success'})
-                let id = JSON.parse(response.bodyText).data.articleid
-                this.$router.push({name: 'BlogLister', query: {id: id}})
+        // 上传封面成功
+        handleAvatarSuccess(res, file) {
+            // console.log(res)
+            // console.log(file)
+            this.imageUrl = URL.createObjectURL(file.raw);
+        },
+        // 对上传到文章封面做限制
+        beforeAvatarUpload(file) {
+            const isJPG = file.type === 'image/jpeg';
+            const isLt2M = file.size / 1024 / 1024 < 2;
+
+            if (!isJPG) {
+            this.$message.error('上传头像图片只能是 JPG 格式!');
             }
-            var errorCallback = (response) => {
-                console.log('服务器请求出错了')
+            if (!isLt2M) {
+            this.$message.error('上传头像图片大小不能超过 2MB!');
             }
+            return isJPG && isLt2M;
+        },
+        onSubmit: function() {
             let artType = this.value1;
             let title = this.form.title;
             let content = this.content;
@@ -136,35 +170,86 @@
                 "content": content,
                 "isoriginal": isoriginal
             }
+            var successCallback = (response) => {
+                let id = JSON.parse(response.bodyText).data.articleid
+                this.$alert('发表成功', '', {type: 'success'})
+                // 改变侧边栏相关的数据
+                this.sendGet({
+                    url : process.env.ROOT_API + "main/getCurStaff.do",
+                    success(response) {
+                        let body = response.bodyText && JSON.parse(response.bodyText);
+                        if (body && body.data) {
+                            this.$store.dispatch("loginAction", {
+                                staffName: body.data.staffName,
+                                artCount: body.data.logonOn,
+                                original: body.data.staffUUID,
+                                score: body.data.isManager
+                            });
+                        }
+                    }
+                })
+                this.$router.push({name: 'BlogLister', query: {id: id}})
+            }
+            var errorCallback = (response) => {
+                console.log('服务器请求出错了')
+            }
             this.$http.post(process.env.ROOT_API + 'article/createArticle.do',
-                obj, {emulateJSON: true}).then(successCallback, errorCallback);
+            obj, {emulateJSON: true}).then(successCallback, errorCallback);
         },
         emit: function() {
           this.content = '';
         }
     },
-      watch: {
-          'value'(newVal, oldVal) {
-              if (this.editor) {
-                  if (newVal !== this.content) {
-                      this.content = newVal
-                  }
-              }
-          }
-      }
+    watch: {
+        'value'(newVal, oldVal) {
+            if (this.editor) {
+                if (newVal !== this.content) {
+                    this.content = newVal
+                }
+            }
+        }
+    }
   }
 </script>
+<style>
+.quill-editor-content .ql-container.ql-snow {
+    height: 300px !important;
+}
+.avatar-uploader .el-upload {
+    width: 40px;
+    height: 40px;
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+}
+.avatar-uploader .el-upload .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    text-align: center;
+}
+.avatar-uploader .el-upload .avatar {
+    width: 40px;
+    height: 40px;
+    display: block;
+}
+</style>
 
 <style scoped>
-  .main {
+.main {
     margin: 20px 0 0 -20px;
-  }
-  /* .ql-editor {
-      height: 300px;
-  } */
-  .title{
-      font-size: 14px;
-      position: relative;
-      top: 10px;
-  }
+}
+
+.title{
+    font-size: 14px;
+    position: relative;
+    top: 10px;
+}
 </style>

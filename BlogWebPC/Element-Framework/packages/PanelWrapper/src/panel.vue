@@ -1,5 +1,5 @@
 <template>
-    <div :style="{position: 'relative', overflow: 'auto', height: height, width: width}">
+    <div :style="{position: 'relative', height: height, width: width}">
         <div class="panel-wrapper-img-container" v-if="this.$slots.img" :style="{height: height, width: imgWidth}">
             <slot name="img"></slot>
         </div>

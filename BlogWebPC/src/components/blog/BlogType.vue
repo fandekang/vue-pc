@@ -68,7 +68,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
     .main {
         margin: 20px 0 0 -20px;
     }
@@ -85,16 +85,4 @@ export default {
     .panel-wrapper-container {
         overflow: hidden;
     }
-/*.main .cell .table-column-log {*/
-/*color: #303133;*/
-/*}*/
-/*.main .cell .table-column-read {*/
-/*padding-left: 15px;*/
-/*}*/
-/*.main .cell .table-column-comment {*/
-/*padding-left: 15px;*/
-/*}*/
-/*.isoriginal{*/
-/*font-size:10px;*/
-/*}*/
 </style>

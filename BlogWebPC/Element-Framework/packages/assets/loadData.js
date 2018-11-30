@@ -50,7 +50,7 @@ export default {
                 else if (body.data && body.data.list) {
                     let arr = []
                     this.source = JSON.parse(response.bodyText).data.list
-                    // 想父组件发送当前文章数
+                    //  向父组件发送当前文章数  @fandekang
                     this.$emit('artLen', this.source.length)
                     this.source.map(v => {
                         arr.push(v.articleid)

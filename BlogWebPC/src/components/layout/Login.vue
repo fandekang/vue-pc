@@ -58,7 +58,7 @@
                             this.$store.dispatch("loginAction", {
                                 staffName: body.data.staffName,
                                 artCount: body.data.logonOn,
-                                original: body.data.doAuth,
+                                original: body.data.staffUUID,
                                 score: body.data.isManager,
                                 staffImgUrl: process.env.ROOT_API + 'main/getStaffImg.do?dt=' + Math.random()
                             });

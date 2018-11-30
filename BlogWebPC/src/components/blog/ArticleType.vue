@@ -14,7 +14,7 @@
         <hr>
         <ul class="hot-article-wrapper">
             <li class="article-list-item" v-for="host in hostList " :key="host.title">
-                <i class="hot-icon iconfont icon-zhishiku-pc-remenwenzhangicon"></i><span class="interEvent" @click="hostEvent(host.articleid)">{{ host.title}}</span>
+                <i class="hot-icon iconfont icon-column_hot"></i><span class="interEvent" @click="hostEvent(host.articleid)">{{ host.title}}</span>
             </li>
         </ul>
     </div>

@@ -16,22 +16,22 @@
                         <el-button type='text' size='mini' @click="giveUp(scope.item.commentid)"><i class='el-icon-star-off'></i>点赞
                         </el-button>
                         (<span>{{ scope.item.praisecount }}</span>)&nbsp;
-                        <el-button type='text' size='mini' @click="showSubReveicer(scope.item.commentid)"><i class='el-icon-edit'></i>回复
+                        <el-button type='text' size='mini' @click="showSubReveicer(scope.item.commentid, scope.index)"><i class='el-icon-edit'></i>回复
                         </el-button>
                         (<span v-if="scope.item.receivecount" @click="showSubCommentsList(scope.item.commentid)"><a href="javascript:;">{{ scope.item.receivecount }}</a></span>
                         <span v-else>0</span>)
                         <transition name="el-zoom-in-top">
                             <div v-show="subreceiveShowIndex==scope.item.commentid">
-                                <sub-comment :subRemote="subRemote" :commentID="commentID">
+                                <sub-comment :subRemote="subRemote" :commentID="commentID" @refreshSubURL="refreshSubURL">
                                 </sub-comment>
                             </div>
                         </transition>
                         <transition  name="el-zoom-in-top">
-                            <div v-show="receiveShowIndex==scope.item.commentid">
+                            <div v-show="receiveShowIndex==scope.item.commentid" class="emoji-wrapper">
                                 <div :id="'toolbar-' + scope.index"  class="editor-title" style="line-height: 26px">
-                                    <b style="float: left">回复内容</b>
+                                    <b style="float: left">回复</b>
                                     &nbsp;&nbsp;&nbsp;
-                                        <i class="iconfont icon-biaoqing" @click="showSubEmoji = !showSubEmoji"></i>
+                                        <i class="iconfont icon-biaoqing" @click="showReplyEmoji(scope.index)"></i>
                                         <transition name="fade">
                                             <div class="emoji-box" v-if="showSubEmoji">
                                                 <el-button class="pop-close" :plain="true" type="danger" size="mini" icon="el-icon-close" @click="showSubEmoji = false">
@@ -42,15 +42,17 @@
                                             </div>
                                         </transition>
                                 </div>
-                                <quill-editor class="editor-content" :rows="3"
-                                v-model="scope.artCon"
+                                <quill-editor class="editor-content"
+                                :ref="'replyEditor' + scope.index"
+                                :rows="3"
+                                v-model="commentCon[scope.index]"
                                 :options="editorOpts(scope.index)"
                                 @blur="onEditorBlur($event)"
                                 @change="onEditorChange($event)">
                                 </quill-editor>
 
                                 <div class="emoji-wrapper clearfix">
-                                    <el-button type="primary" size="small" @click="reply(scope.item.commentid, scope.artCon)" class="submit">回复
+                                    <el-button type="primary" size="small" @click="reply(scope.item.commentid)" class="submit">回复
                                     </el-button>
                                 </div>
                             </div>
@@ -82,16 +84,17 @@ export default {
     },
     data() {
         return {
+            CommentIndex: -1, // 点击的子评论项的索引
+            commentCon: {}, // 二级评论列表内容
             showSubEmoji: false,
             subreceiveShowIndex: 0, // 是否展示二级评论列表
             receiveShowIndex: 0, // 是否展示回复框
             errorUserImg: `this.src='${defaultImg}'`,
             root: process.env.ROOT_API,
-            // remote: process.env.ROOT_API + 'comments/getSuperCommentListByArtID.do',
             remoteParam: {
                 articleID: this.$route.query.id
             },
-            subRemote: '',
+            subRemote: '', // 二级评论列表地址
             commentID: '', // 一级评论ID
             pager: {
                 pageSizes: [2, 5],
@@ -101,32 +104,43 @@ export default {
         }
     },
     methods: {
+        // 刷新二级评论列表地址
+        refreshSubURL() {
+            this.subRemote = process.env.ROOT_API + 'comments/getCommentByCommentID.do?random=' + Math.random()
+        },
+        showReplyEmoji(index) {
+            this.showSubEmoji = !this.showSubEmoji
+            this.$refs['replyEditor' + this.CommentIndex].quill.focus()
+        },
         editorOpts(index) {
             return {
-                placeholder: "请编辑回复内容" + index,
+                placeholder: "请编辑回复内容",
                 modules:{
                     toolbar: '#toolbar-' + index
                 }
             }
         },
         onEditorBlur(val) {
-            console.log('失去了焦点')
+            // console.log('失去了焦点')
         },
         onEditorChange({ editor, html, text }) {
-            console.log('editor change!', html)
-            // this.replyContent = html
+            // console.log('editor changed')
         },
-        // 选择子级表情框中的表情
+        // 选择表情
         subSelectEmoji(code) {
             // 插入表情
-            // let reg = /^<p>|<\/p>$/;
-            let quill = this.$refs.replyEditor.quill,
+            let reg = /^<p>|<\/p>$/;
+            let replyEditorHook = 'replyEditor' + this.CommentIndex
+            let quill = this.$refs[replyEditorHook].quill,
                 range = quill.getSelection();
-            console.log('++++++++++++', this.replyContent)
-            this.replyContent = this.replyContent + this.$AngusVueEmoji(code);
-            console.log('----------------', this.replyContent)
-            // this.replyContent = this.replyContent.replace(reg, '') + this.$AngusVueEmoji(code);
-            console.log(range)
+            if(this.commentCon[this.CommentIndex]) {
+                this.commentCon[this.CommentIndex] = this.commentCon[this.CommentIndex].replace(reg, '') + this.$AngusVueEmoji(code)
+            }
+            else {
+                this.commentCon[this.CommentIndex] = this.$AngusVueEmoji(code)
+            }
+            this.showSubEmoji = false
+            // console.log(range)
             setTimeout(function() {
                 quill.setSelection(range.index + 1);
                 // console.log("完成");
@@ -144,13 +158,17 @@ export default {
             }
         },
         // 是否展示回复框
-        showSubReveicer(commentid) {
+        showSubReveicer(commentid, index) {
+            this.CommentIndex = index // 将该评论项的索引存起来
+            // this.$refs['replyEditor' + index].quill.focus()
             if (this.receiveShowIndex === commentid) {
                 this.receiveShowIndex = -1
             }
             else {
                 this.receiveShowIndex = commentid
+                // this.$refs['replyEditor' + index].quill.focus()
             }
+            this.$refs.replyEditor0.quill.focus()
         },
         // 点赞
         giveUp: function(value) {
@@ -159,8 +177,8 @@ export default {
                     objid: value
                 },
                 success = (data) => {
-                    // 评论刷新
-                    this.remote = process.env.ROOT_API + 'comments/getSuperCommentListByArtID.do?random=' + Math.random()
+                    // 刷新
+                    this.$emit('refreshURL')
                     // this.loadingFlag = false
                 },
                 error = () => {
@@ -168,22 +186,20 @@ export default {
                 }
             this.sendPost({url, param, success, error})
         },
-        // 回复一级评论 commentid:一级评论ID， artCon:回复内容
-        reply: function(commentid, artCon) {
-            if (artCon !== '') {
+        // 回复一级评论 commentid:一级评论ID
+        reply: function(commentid) {
+            if (this.commentCon[this.CommentIndex] !== '') {
                 let url = process.env.ROOT_API + 'comments/receiveComments.do',
                     param = {
                         articleID: this.$route.query.id,
                         commentsID: commentid,
-                        content: artCon
+                        content: this.commentCon[this.CommentIndex]
                     },
                     success = () => {
+                        this.commentCon[this.CommentIndex] = ''
                         this.receiveShowIndex = -1
+                        this.$emit('refreshURL')
                         // this.subreceiveShowIndex = commentid // 展开二级评论列表
-                        this.remote =
-                            process.env.ROOT_API +
-                            'comments/getSuperCommentListByArtID.do?random=' +
-                            Math.random()
                     },
                     error = () => {
                         this.$message.error('回复失败')
@@ -198,6 +214,11 @@ export default {
 }
 </script>
 <style>
+.submit {
+    background: #f1f1eb;
+    color: #666;
+    border: none;
+}
 .icon-face {
     color: red !important;
     background: red !important;

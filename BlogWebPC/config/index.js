@@ -12,8 +12,8 @@ module.exports = {
     assetsPublicPath: '/',
     proxyTable: {
         '/BlogServerPC/*':{ //代理路径
-          // target: 'http://101.37.70.52:80',
             target: 'http://101.37.70.52:8082',
+            // target: 'http://192.168.1.134:8080',
             secure: false,
             changerOrigin:true,   //改变源
         }
@@ -40,12 +40,12 @@ module.exports = {
      */
 
     // https://webpack.js.org/configuration/devtool/#development
-    devtool: 'cheap-module-eval-source-map',
+      devtool: 'eval-source-map',
 
     // If you have problems debugging vue-files in devtools,
     // set this to false - it *may* help
     // https://vue-loader.vuejs.org/en/options.html#cachebusting
-    cacheBusting: true,
+    cacheBusting: false,
 
     cssSourceMap: true
   },

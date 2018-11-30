@@ -9,7 +9,7 @@
         </div> -->
 
         <panelList-wrapper @panelData="getPanelData" class="fandekang" :data-url="url" :pager='pager' :height="height" :checkall="checkAll" @checkAll="getCheckAll">
-                <panel-wrapper class="panel-wrapper" slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
+                <panel-wrapper slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
                     <el-checkbox class="checkedItem" v-show="checkedItems" :label="scope.item.articleid"></el-checkbox>
                     <router-link :to="{name:'MyBlogEdit', params:{id:scope.item.articleid}}" class="header"
                     :class="[checkedItems ? ' magin-left-30' : '']" slot='header' v-html='scope.item.title'>
@@ -21,16 +21,17 @@
                         (<span>{{ scope.item.readcount }}</span>)&nbsp;
                         <el-button type='text' size='mini'><i class='el-icon-tickets'></i>评论</el-button>
                         (<span>{{ scope.item.commentcount }}</span>)
-                        <el-button class="footer-delete" >删除</el-button>
-                        <hr>
+                        <el-button class="footer-delete" @click="deleteMyBlog(scope.item.articleid)">删除</el-button>
                     </div>
                 </panel-wrapper>
         </panelList-wrapper>
     </div>
 </template>
 <script type="text/javascript">
+import loadData from '@assets/js/loadData'
 export default {
   name: "MyBlogList",
+  mixins: [loadData],
   data() {
     return {
       checkedArticles: [],
@@ -62,6 +63,45 @@ export default {
     }
   },
   methods: {
+    deleteMyBlog(articleid) {
+        this.$confirm('确定删除改文章吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+            let url = process.env.ROOT_API + 'article/deleteArticleByID.do',
+                param = { articleID: articleid },
+                success = (res) => {
+                    this.$message.success('删除成功')
+                    this.sendGet({
+                        url : process.env.ROOT_API + "main/getCurStaff.do",
+                        success(response) {
+                            let body = response.bodyText && JSON.parse(response.bodyText);
+                            // console.log('侧边栏信息')
+                            // console.log(body)
+                            if (body && body.data) {
+                                this.$store.dispatch("loginAction", {
+                                    staffName: body.data.staffName,
+                                    artCount: body.data.logonOn,
+                                    original: body.data.staffUUID,
+                                    score: body.data.isManager
+                                });
+                            }
+                        }
+                    })
+                    this.url = process.env.ROOT_API + "article/getMyBlogList.do?random=" + Math.random()
+                },
+                error = () => {
+                    this.$message.error('删除失败')
+                }
+            this.sendPost({url, param, success, error})
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        });
+    },
     getCheckAll(val) {
         this.checkAll = val
     },
@@ -107,15 +147,12 @@ export default {
     font-size: 14px;
     color: #606266;
 }
-.panel-wrapper-container {
-    overflow: hidden;
-}
 </style>
 
 <style scoped>
-.panel-wrapper {
-    border-bottom: 1px solid #e4e7ed !important;
-}
+/* .panel-wrapper-container {
+    border-bottom: 1px solid #ccc !important;
+} */
 .main {
     margin: 0;
 }
@@ -132,7 +169,7 @@ export default {
     float: right;
     padding: 8px 12px;
     border: none;
-    color: red;
+    color: red !important;
 }
 .footer-delete:hover {
     background: transparent;
