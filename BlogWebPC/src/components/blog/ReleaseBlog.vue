@@ -142,9 +142,7 @@
     methods: {
         // 上传封面成功
         handleAvatarSuccess(res, file) {
-            // console.log(res)
-            // console.log(file)
-            this.imageUrl = URL.createObjectURL(file.raw);
+            this.imageUrl = file.response.data;
         },
         // 对上传到文章封面做限制
         beforeAvatarUpload(file) {
@@ -164,11 +162,13 @@
             let title = this.form.title;
             let content = this.content;
             let isoriginal = this.isoriginal;
+            let cover = this.imageUrl
             let obj = {
                 "artType": artType,
                 "title": title,
                 "content": content,
-                "isoriginal": isoriginal
+                "isoriginal": isoriginal,
+                "cover": cover
             }
             var successCallback = (response) => {
                 let id = JSON.parse(response.bodyText).data.articleid
@@ -216,8 +216,8 @@
     height: 300px !important;
 }
 .avatar-uploader .el-upload {
-    width: 40px;
-    height: 40px;
+    width: 80px;
+    height: 60px;
     border: 1px dashed #d9d9d9;
     border-radius: 6px;
     cursor: pointer;
@@ -230,14 +230,14 @@
 .avatar-uploader .el-upload .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
+    width: 80px;
+    height: 60px;
+    line-height: 60px;
     text-align: center;
 }
 .avatar-uploader .el-upload .avatar {
-    width: 40px;
-    height: 40px;
+    width: 80px;
+    height: 60px;
     display: block;
 }
 </style>

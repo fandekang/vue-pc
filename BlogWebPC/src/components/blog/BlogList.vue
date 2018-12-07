@@ -1,12 +1,15 @@
 <template>
     <div class="main">
         <panelList-wrapper :data-url="url" :pager='pager' :height="height">
-            <panel-wrapper class="article-list-item" slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
-                <router-link :to="{path:'Blog', query:{id:scope.item.articleid}}" class="head" slot='header' v-html='scope.item.title'>
+            <panel-wrapper class="article-list-item" slot-scope='scope' height="135px" imgWidth="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
+                <img v-if="scope.item.cover" :src="scope.item.cover" slot="img">
+                <img v-else :src="defaultImg" slot="img">
+                <router-link :to="{path:'Blog', query:{id:scope.item.articleid}}"  class="head" slot='header' v-html='scope.item.title'>
                 </router-link>
                 <div class='body' v-html='formatContent(scope.item.content)'></div>
                 <div slot='footer' class='footer'>
                     <span class="isoriginal">{{ scope.item.isoriginal ? '原创' : '转载' }}</span>&nbsp;&nbsp;<span>{{ scope.item.pubdate}}</span>&nbsp;
+                    <span class="color-def" style="margin-right: 10px;">发布人:{{scope.item.author}}</span>
                     <span class="color-def">类型: {{scope.item.arttype}}</span>&nbsp;
                     <el-button class="color-def" type='text' size='mini'><i class='el-icon-view'></i>阅读</el-button>(<span>{{ scope.item.readcount }}</span>)&nbsp;
                     <el-button class="color-def" type='text' size='mini'><i class='el-icon-tickets'></i>评论</el-button>(<span>{{ scope.item.commentcount }}</span>)
@@ -16,6 +19,7 @@
     </div>
 </template>
 <script type="text/javascript">
+import defaultImg from '@assets/images/article_default.jpg'
     export default {
         name: "BlogList",
         mounted() {
@@ -32,6 +36,7 @@
         },
         data() {
             return {
+                defaultImg,
                 url: process.env.ROOT_API + 'article/getBlogList.do',
                 windowHeight: 0,
                 pager: {
@@ -65,7 +70,11 @@
 </script>
 
 <style scoped>
+.panel-wrapper-img-container img {
+    border-radius: 6px;
+}
 .article-list-item {
+    margin: 10px 0;
     overflow: visible !important;
 }
 .color-def {

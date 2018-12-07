@@ -8,9 +8,13 @@
             <el-button class="bulk-edit" @click="checkedItems = !checkedItems">批量编辑</el-button>
         </div> -->
 
-        <panelList-wrapper @panelData="getPanelData" class="fandekang" :data-url="url" :pager='pager' :height="height" :checkall="checkAll" @checkAll="getCheckAll">
-                <panel-wrapper slot-scope='scope' height="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
-                    <el-checkbox class="checkedItem" v-show="checkedItems" :label="scope.item.articleid"></el-checkbox>
+        <panelList-wrapper @panelData="getPanelData" :data-url="url" :pager='pager' :checkall="checkAll" :height="height" @checkAll="getCheckAll">
+                <panel-wrapper class="article-item" slot-scope='scope' height="135px"
+                imgWidth="160px" headerBgColor='#fff' :bordered='false' :innerBordered='false'>
+                    <img v-if="scope.item.cover" :src="scope.item.cover" slot="img">
+                    <img v-else :src="defaultImg" slot="img">
+
+                    <!-- <el-checkbox class="checkedItem" v-show="checkedItems" :label="scope.item.articleid"></el-checkbox> -->
                     <router-link :to="{name:'MyBlogEdit', params:{id:scope.item.articleid}}" class="header"
                     :class="[checkedItems ? ' magin-left-30' : '']" slot='header' v-html='scope.item.title'>
                     </router-link>
@@ -29,11 +33,13 @@
 </template>
 <script type="text/javascript">
 import loadData from '@assets/js/loadData'
+import defaultImg from '@assets/images/article_default.jpg'
 export default {
   name: "MyBlogList",
   mixins: [loadData],
   data() {
     return {
+      defaultImg,
       checkedArticles: [],
       checkAll: false,
       isIndeterminate: true,
@@ -150,9 +156,12 @@ export default {
 </style>
 
 <style scoped>
-/* .panel-wrapper-container {
-    border-bottom: 1px solid #ccc !important;
-} */
+.panel-wrapper-img-container img {
+    border-radius: 6px;
+}
+.article-item {
+    margin: 10px 0;
+}
 .main {
     margin: 0;
 }

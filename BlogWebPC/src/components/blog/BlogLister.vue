@@ -43,7 +43,8 @@
                 v-model="commentContent"
                 ref="commentsEditor"
                 :rows="3"
-                :options="editorOption">
+                :options="editorOption"
+                @change="onEditorChange($event)">
                 </quill-editor>
             </el-col>
         </el-row>
@@ -113,6 +114,9 @@ export default {
         }
     },
     methods: {
+        onEditorChange({ editor, html, text }) {
+            // console.log('editor changed')
+        },
         // 刷新一级评论列表的地址
         refreshURL() {
             this.remote = process.env.ROOT_API + 'comments/getSuperCommentListByArtID.do?random=' + Math.random()
@@ -131,15 +135,14 @@ export default {
             let reg = /^<p>|<\/p>$/;
             let quill = this.$refs.commentsEditor.quill,
                 range = quill.getSelection();
+
             if(this.commentContent) {
                 this.commentContent = this.commentContent.replace(reg, '') + this.$AngusVueEmoji(code);
             }
             else {
                this.commentContent = this.$AngusVueEmoji(code);
             }
-            // console.log(range)
             this.showEmoji = false
-
             setTimeout(function() {
                 quill.setSelection(range.index + 1);
                 // console.log("完成");
